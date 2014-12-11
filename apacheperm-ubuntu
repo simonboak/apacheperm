@@ -1,0 +1,38 @@
+#!/usr/bin/env python
+#
+# apacheperm - update owner, group and permissions for given directory
+#
+#    http://fideloper.com/user-group-permissions-chmod-apache
+# 1. Set the owner/group of the web root (and any directories/files therin)
+# 2. Make it so no-one but the current user (www-data) can access the web-root content
+# 3. Allow users of the same group (and other) to enter the directory
+# 4. Change all directories and files to the same group (www-data)
+# 5. Reset: make it so only the user can access web content
+# 6. Make it so anyone in the same group can read/write and execute directories/files
+# 7. Group write permissions for users who need to modify content or deploy code
+#
+
+import sys
+import subprocess
+
+if len(sys.argv) < 2:
+    print "Usage: apacheperm <target directory>" 
+    quit()
+
+dir = sys.argv[1]
+
+commandList = [
+    'sudo chown -R www-data:www-data ' + dir,
+    'sudo chmod go-rwx ' + dir,
+    'sudo chmod go+x ' + dir,
+    'sudo chgrp -R www-data ' + dir,
+    'sudo chmod -R go-rwx ' + dir,
+    'sudo chmod -R g+rx ' + dir,
+    'sudo chmod -R g+rwx ' + dir
+]
+
+for command in commandList:
+    print 'apacheperm: Running ' + command
+    subprocess.call(command.split(), shell=False)
+
+
